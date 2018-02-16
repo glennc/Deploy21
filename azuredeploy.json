@@ -17,22 +17,14 @@
       "sku": {
         "type": "string",
         "allowedValues": [
-          "F1",
-          "D1",
-          "B1",
-          "B2",
-          "B3",
-          "S1",
-          "S2",
-          "S3",
-          "P1",
-          "P2",
-          "P3",
-          "P4"
+            "Free",
+            "Shared",
+            "Basic",
+            "Standard"
         ],
-        "defaultValue": "S1",
+        "defaultValue": "Standard",
         "metadata": {
-          "description": "The pricing tier for the hosting plan."
+            "description": "The pricing tier for the hosting plan."
         }
       },
       "workerSize": {
@@ -52,6 +44,7 @@
           "defaultValue": "2.1-preview1-28281"
       }
     },
+
     "resources": [
       {
         "apiVersion": "2015-08-01",
@@ -59,8 +52,9 @@
         "type": "Microsoft.Web/serverfarms",
         "location": "[resourceGroup().location]",
         "sku": {
-          "name": "[parameters('sku')]",
-          "capacity": "[parameters('workerSize')]"
+            "name": "[parameters('hostingPlanName')]",
+            "sku": "[parameters('sku')]",
+            "capacity": "[parameters('workerSize')]"
         },
         "properties": {
           "name": "[parameters('hostingPlanName')]"
