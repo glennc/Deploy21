@@ -30,10 +30,14 @@
       "aspnetcoreversion": {
         "type": "string",
         "defaultValue": "2.1-preview1-28281"
+      },
+      "webSiteName": {
+          "type":"string",
+          "defaultValue": "[concat('webSite', uniqueString(resourceGroup().id))]"
       }
     },
     "variables": {
-      "webSiteName": "[concat('webSite', uniqueString(resourceGroup().id))]"
+      
     },
     "resources": [
       {
@@ -55,7 +59,7 @@
       },
       {
         "apiVersion": "2015-08-01",
-        "name": "[variables('webSiteName')]",
+        "name": "[paramaters('webSiteName')]",
         "type": "Microsoft.Web/sites",
         "location": "[resourceGroup().location]",
         "tags": {
@@ -66,7 +70,7 @@
           "[resourceId('Microsoft.Web/serverfarms/', parameters('hostingPlanName'))]"
         ],
         "properties": {
-          "name": "[variables('webSiteName')]",
+          "name": "[paramaters('webSiteName')]",
           "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', parameters('hostingPlanName'))]"
         },
         "resources": [
