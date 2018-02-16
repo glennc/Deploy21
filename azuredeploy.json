@@ -25,11 +25,12 @@
       },
       "webSiteName": {
           "type":"string",
-          "defaultValue": "[concat('webSite', uniqueString(resourceGroup().id))]"
+          "defaultValue": "[variables('defaultName')]"
       }
     },
     "variables": {
-      "skuCapacity": "1"
+      "skuCapacity": "1",
+      "defaultName": "[concat('webSite', uniqueString(resourceGroup().id))]"
     },
     "resources": [
       {
