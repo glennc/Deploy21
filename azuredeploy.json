@@ -102,7 +102,7 @@
               },
               "dependsOn": [
                 "[resourceId('Microsoft.Web/Sites', parameters('siteName'))]",
-                "[resourceId('Microsoft.Web/Sites/siteextensions', paramaters('siteName'), 'AspNetCoreRuntime')]"
+                "[resourceId('Microsoft.Web/Sites/siteextensions', parameters('siteName'), 'AspNetCoreRuntime')]"
               ]
             }
     
