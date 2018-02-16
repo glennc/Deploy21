@@ -46,6 +46,10 @@
         "metadata": {
           "description": "The instance size of the hosting plan (small, medium, or large)."
         }
+      },
+      "aspnetcoreversion": {
+          "type": "string",
+          "defaultValue": "2.1-preview1-28281"
       }
     },
     "resources": [
@@ -84,7 +88,7 @@
                 "feed_url": "https://dotnet.myget.org/F/aspnetcore-release/"
               },
               "dependsOn": [
-                "[resourceId('Microsoft.Web/Sites', resourceGroup().name)]"
+                "[resourceId('Microsoft.Web/Sites', resourceGroup().name, [parameters('siteName'))]"
               ]
             },
             {
@@ -97,7 +101,7 @@
                 "feed_url": "https://dotnet.myget.org/F/aspnetcore-release/"
               },
               "dependsOn": [
-                "[resourceId('Microsoft.Web/Sites', resourceGroup().name)]",
+                "[resourceId('Microsoft.Web/Sites', resourceGroup().name, [parameters('siteName'))]",
                 "[resourceId('Microsoft.Web/Sites/siteextensions', resourceGroup().name, 'AspNetCoreRuntime')]"
               ]
             }
