@@ -2,121 +2,110 @@
     "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
-        "aspnetcoreVersion": {
-            "type": "String"
-        },
-        "WebAppSvcPlanName": {
-            "type": "string",
-            "minLength": 1,
-            "defaultValue": "AppSvcPlan",
-            "metadata": {
-              "description": "Name of AppSvc Plan."
-            }
-          },
-          "WebAppSvcPlanSKU": {
-            "type": "string",
-            "allowedValues": [
-              "Free",
-              "Shared",
-              "Basic",
-              "Standard"
-            ],
-            "defaultValue": "Free",
-            "metadata": {
-              "description": "App Svc Plan SKU."
-            }
-          },
-          "WebAppSvcPlanWorkerSize": {
-            "type": "string",
-            "allowedValues": [
-              "0",
-              "1",
-              "2"
-            ],
-            "defaultValue": "0",
-            "metadata": {
-              "description": "Size of AppSvc Worker."
-            }
-          },
-          "WebAppName": {
-            "type": "string",
-            "minLength": 1,
-            "metadata": {
-              "description": "Name of web site."
-            }
-          }
+      "hostingPlanName": {
+        "type": "string",
+        "minLength": 1
+      },
+      "skuName": {
+        "type": "string",
+        "defaultValue": "F1",
+        "allowedValues": [
+          "F1",
+          "D1",
+          "B1",
+          "B2",
+          "B3",
+          "S1",
+          "S2",
+          "S3",
+          "P1",
+          "P2",
+          "P3",
+          "P4"
+        ],
+        "metadata": {
+          "description": "Describes plan's pricing tier and capacity. Check details at https://azure.microsoft.com/en-us/pricing/details/app-service/"
+        }
+      },
+      "skuCapacity": {
+        "type": "int",
+        "defaultValue": 1,
+        "minValue": 1,
+        "metadata": {
+          "description": "Describes plan's instance count"
+        }
+      },
+      "aspnetcoreversion": {
+        "type": "string",
+        "defaultValue": "2.1-preview1-28281"
+      }
+    },
+    "variables": {
+      "webSiteName": "[concat('webSite', uniqueString(resourceGroup().id))]"
     },
     "resources": [
-        {
-            "name": "[parameters('WebAppSvcPlanName')]",
-            "type": "Microsoft.Web/serverfarms",
-            "location": "[resourceGroup().location]",
-            "apiVersion": "2014-06-01",
-            "dependsOn": [ ],
-            "tags": {
-                "displayName": "AppSvcPlan"
-            },
-            "properties": {
-                "name": "[parameters('WebAppSvcPlanName')]",
-                "sku": "[parameters('WebAppSvcPlanSKU')]",
-                "workerSize": "[parameters('WebAppSvcPlanWorkerSize')]",
-                "numberOfWorkers": 1
-            }
+      {
+        "apiVersion": "2015-08-01",
+        "name": "[parameters('hostingPlanName')]",
+        "type": "Microsoft.Web/serverfarms",
+        "location": "[resourceGroup().location]",
+        "tags": {
+          "displayName": "HostingPlan"
         },
-        {
-            "name": "[parameters('WebAppName')]",
-            "type": "Microsoft.Web/sites",
-            "location": "[resourceGroup().location]",
+        "sku": {
+          "name": "[parameters('skuName')]",
+          "capacity": "[parameters('skuCapacity')]"
+        },
+        "properties": {
+          "name": "[parameters('hostingPlanName')]"
+        }
+      },
+      {
+        "apiVersion": "2015-08-01",
+        "name": "[variables('webSiteName')]",
+        "type": "Microsoft.Web/sites",
+        "location": "[resourceGroup().location]",
+        "tags": {
+          "[concat('hidden-related:', resourceGroup().id, '/providers/Microsoft.Web/serverfarms/', parameters('hostingPlanName'))]": "Resource",
+          "displayName": "Website"
+        },
+        "dependsOn": [
+          "[resourceId('Microsoft.Web/serverfarms/', parameters('hostingPlanName'))]"
+        ],
+        "properties": {
+          "name": "[variables('webSiteName')]",
+          "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', parameters('hostingPlanName'))]"
+        },
+        "resources": [
+          {
+            "type": "siteextensions",
+            "name": "AspNetCoreRuntime",
             "apiVersion": "2015-08-01",
-            "dependsOn": [
-              "[concat('Microsoft.Web/serverfarms/', parameters('WebAppSvcPlanName'))]"
-            ],
-            "tags": {
-              "[concat('hidden-related:', resourceGroup().id, '/providers/Microsoft.Web/serverfarms/', parameters('WebAppSvcPlanName'))]": "Resource",
-              "displayName": "WebApp"
-            },
+            "location": "[resourceGroup().location]",
             "properties": {
-              "name": "[parameters('WebAppName')]",
-              "serverFarmId": "[resourceId('Microsoft.Web/serverfarms/', parameters('WebAppSvcPlanName'))]"
+              "version": "[parameters('aspnetcoreVersion')]",
+              "feed_url": "https://dotnet.myget.org/F/aspnetcore-release/"
             },
-            "resources": [
-                {
-                    "type": "siteextensions",
-                    "name": "AspNetCoreRuntime",
-                    "apiVersion": "2015-08-01",
-                    "location": "[resourceGroup().location]",
-                    "properties": {
-                        "version": "[parameters('aspnetcoreVersion')]",
-                        "feed_url": "https://dotnet.myget.org/F/aspnetcore-release/"
-                    },
-                    "dependsOn": [
-                        "[resourceId('Microsoft.Web/Sites', resourceGroup().name)]"
-                    ]
-                },
-                {
-                    "type": "siteextensions",
-                    "name": "Microsoft.AspNetCore.AzureAppServices.SiteExtension",
-                    "apiVersion": "2015-08-01",
-                    "location": "[resourceGroup().location]",
-                    "properties": {
-                        "version": "[parameters('aspnetcoreVersion')]",
-                        "feed_url": "https://dotnet.myget.org/F/aspnetcore-release/"
-                    },
-                    "dependsOn": [
-                        "[resourceId('Microsoft.Web/Sites', resourceGroup().name)]",
-                        "[resourceId('Microsoft.Web/Sites/siteextensions', resourceGroup().name, 'AspNetCoreRuntime')]"
-                    ]
-                }
-            ],
             "dependsOn": [
-                "[resourceId('Microsoft.Web/serverfarms', resourceGroup().name)]"
+              "[resourceId('Microsoft.Web/Sites', resourceGroup().name)]"
             ]
-        }
-    ],
-    "outputs": {
-        "siteId": {
-            "type": "String",
-            "value": "[resourceId(resourceGroup().name, 'Microsoft.Web/sites', resourceGroup().name)]"
-        }
-    }
-}
+          },
+          {
+            "type": "siteextensions",
+            "name": "Microsoft.AspNetCore.AzureAppServices.SiteExtension",
+            "apiVersion": "2015-08-01",
+            "location": "[resourceGroup().location]",
+            "properties": {
+              "version": "[parameters('aspnetcoreVersion')]",
+              "feed_url": "https://dotnet.myget.org/F/aspnetcore-release/"
+            },
+            "dependsOn": [
+              "[resourceId('Microsoft.Web/Sites', resourceGroup().name)]",
+              "[resourceId('Microsoft.Web/Sites/siteextensions', resourceGroup().name, 'AspNetCoreRuntime')]"
+            ]
+          }
+  
+        ]
+      }
+    ]
+  }
