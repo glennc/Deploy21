@@ -115,14 +115,13 @@
                   "[resourceId('Microsoft.Web/Sites/siteextensions', parameters('siteName'), 'Microsoft.AspNetCore.AzureAppServices.SiteExtension')]"
                 ],
                 "tags": {
-                  "displayName": "TestAppDeploy"
+                  "displayName": "DeployTestAppContent"
                 },
                 "properties": {
                   "packageUri": "[variables('deployUri')]",
                   "dbType": "None",
                   "connectionString": "",
                   "setParameters": {
-                    "IIS Web Application Name": "[parameters('siteName')]"
                   }
                 }
               }
