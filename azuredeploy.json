@@ -50,7 +50,9 @@
         "type": "string"
       }
     },
-
+    "variables": {
+      "deployUri": "https://github.com/glennc/Deploy21/releases/download/preview1/hellopreview1.zip"
+    },
     "resources": [
       {
         "apiVersion": "2015-04-01",
@@ -102,19 +104,26 @@
                 "[resourceId('Microsoft.Web/Sites/siteextensions', parameters('siteName'), 'AspNetCoreRuntime')]"
               ]
             },
-            {
+              {
+                "name": "MSDeploy",
+                "type": "extensions",
+                "location": "[resourceGroup().location]",
                 "apiVersion": "2015-08-01",
-                "name": "web",
-                "type": "sourcecontrols",
                 "dependsOn": [
                   "[resourceId('Microsoft.Web/Sites', parameters('siteName'))]",
                   "[resourceId('Microsoft.Web/Sites/siteextensions', parameters('siteName'), 'AspNetCoreRuntime')]",
                   "[resourceId('Microsoft.Web/Sites/siteextensions', parameters('siteName'), 'Microsoft.AspNetCore.AzureAppServices.SiteExtension')]"
                 ],
+                "tags": {
+                  "displayName": "TestAppDeploy"
+                },
                 "properties": {
-                  "RepoUrl": "[parameters('repoUrl')]",
-                  "branch": "[parameters('branch')]",
-                  "IsManualIntegration": "true"
+                  "packageUri": "[variables('deployUri')]",
+                  "dbType": "None",
+                  "connectionString": "",
+                  "setParameters": {
+                    "IIS Web Application Name": "[parameters('siteName')]"
+                  }
                 }
               }
           ]
